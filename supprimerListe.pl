@@ -13,8 +13,13 @@ while(<>) {
 
 sub supprimer {
         $login                = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
+
+        $loginRetour = verification($login);
+        chomp($loginRetour);
+        $login = $loginRetour; 
+
         $cheminLogin          = "/home/user/$login/"; 
-        
+       
         #On supprime le login de user
         qx/ delgroup $login user /;
         
@@ -26,6 +31,32 @@ sub supprimer {
 
         #On envoie en paramètre le login qui va être supprime du fichier log
         triListe($login);
+        print "Le login $login n'existe plus, ainsi que son répertoire.\n";
+}
+
+##############################
+## Fonction de vérification ##
+##############################
+
+sub verification {
+    $ligne = 0; 
+
+    $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
+    chomp($nombreDeLigne);
+    
+    if ($nombreDeLigne >= 2) {
+        print "Il existe plusieurs login constituant : $login.\n";
+        $nom = `getent group | cut -d : -f 1 | grep $login`;
+        print $nom;
+
+        print "Lequel voulez vous supprimer : ";
+        $loginRetour = <STDIN>; 
+
+        return $loginRetour;
+
+    }else{
+        return $login;
+    }
 }
 
 ##########################################################
@@ -39,7 +70,7 @@ sub triListe {
                 while (my $ligne = <LOG>){
                         #Si le début de la ligne ne correspond pas au login de la personne que l'on supprime
                         #On l'ajoute au fichier lg2
-                        if ($ligne !~ /^$login/){ 
+                        if ($ligne !~ /^$login;/){ 
                                print LOG2 $ligne;
                         }
                 } 
