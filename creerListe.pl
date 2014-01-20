@@ -37,6 +37,8 @@ sub creer {
                         $i++;
                 }
         }
+	closedir(DIR);
+
         $login                 .= $i         if($i != 1);
         
         #On ajoue un groupe au nom du login

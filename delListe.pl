@@ -22,20 +22,17 @@ sub supprimer {
         qx/ deluser $login /;
 
         #On supprime l'intérieur du fichier
-        `rm -rf $cheminLogin*`;
-
-        #On supprime le dossier de la personne
-        `rmdir $cheminLogin`;
+        `rm -rf $cheminLogin`;
 
         #On envoie en paramètre le login qui va être supprime du fichier log
-        triListe($login);
+        trierListe($login);
 }
 
 ##########################################################
 ## Fonction de supression d'un user dans le fichier log ##
 ##########################################################
 
-sub triListe {
+sub trierListe {
         #Création du fichier log2 et ouverture du fichier log
         open(LOG2, ">>log2") || die ("impossible d'ourir le fichier LOG. \n");
         open(LOG, "log") || die ("Fichier LOG inexistant. \n");
