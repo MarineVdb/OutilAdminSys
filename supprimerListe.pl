@@ -39,8 +39,6 @@ sub supprimer {
 ##############################
 
 sub verification {
-    $ligne = 0; 
-
     $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
     chomp($nombreDeLigne);
     
