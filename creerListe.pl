@@ -28,19 +28,11 @@ while(<>) {
 sub creer {
         $login                = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
         
-        #On vérifie que la personne n'existe pas déjà, 
-        #si c'est le cas chiffre après son login
-        $i                         = 1;
-        opendir (DIR, '/home/user');
-        while (readdir(DIR)) {
-                if($_ eq $login) {
-                        $i++;
-                }
-        }
-	closedir(DIR);
-
-        $login                 .= $i         if($i != 1);
-        
+        #On regarde le nombre de ligne que contient le login
+        $nombreDeLigne = `getent group | cut -d : -f 1 | grep vandenbm | wc -l`;
+        chomp($nombreDeLigne);
+        $login .= $nombreDeLigne+1 if ($nombreDeLigne >= 1); #Si c'est >= 1 alors on lui ajoute le chiffre
+      
         #On ajoue un groupe au nom du login
         qx/ groupadd $login /;
         
