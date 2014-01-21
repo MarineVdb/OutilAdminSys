@@ -49,6 +49,7 @@ sub verification {
     chomp($nombreDeLigne);
     
     $nomRetrouve = `getent group | cut -d : -f 1 | grep $login` if($nombreDeLigne == 1);
+    chomp($nomRetrouve);
 
     if ($nombreDeLigne >= 2) {
         print "Il existe plusieurs login constituant : $login.\n";

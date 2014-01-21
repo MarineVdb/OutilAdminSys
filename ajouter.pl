@@ -25,8 +25,8 @@ if (opendir(DIR, skel)) {
 #Lecture de la ligne/du fichier
 while(<>) {
         chomp;
-        ($nom, $prenom)= split(';', $_);
-        creer($nom, $prenom);
+        #($nom, $prenom) = split(/;/, $_);
+	creer($1, $2) if(/(.*)[;,:](.*)/);
 }
 
 
@@ -45,28 +45,30 @@ sub creer {
         $login = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
         
         #On regarde le nombre de ligne que contient le login
-        $nombreDeLigne = `getent group | cut -d : -f 1 | grep vandenbm | wc -l`;
+        $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
         chomp($nombreDeLigne);
         $login .= $nombreDeLigne+1 if ($nombreDeLigne >= 1); #Si c'est >= 1 alors on lui ajoute le chiffre
       
+	print $login;
+
         #On ajoue un groupe au nom du login
-        qx/ groupadd $login /;
+        #qx/ groupadd $login /;
         
         #Création du mot de passe aléatoire
-        $pass                = qx/ pwgen -sA1 8 /;
-        chomp $pass;
+        #$pass                = qx/ pwgen -sA1 8 /;
+        #chomp $pass;
 
         #Cryptage du mot de passe
-        $crypt_pass = qx/ mkpasswd -m md5 $pass /;
-        chomp $crypt_pass;
+        #$crypt_pass = qx/ mkpasswd -m md5 $pass /;
+        #chomp $crypt_pass;
 
         #Ajout de l'utilisateur
-        qx/ useradd $login -p '$crypt_pass' -g $login -G $login,user -d \/home\/user\/$login -k \/home\/skel -m -s \/bin\/bash /;
+        #qx/ useradd $login -p '$crypt_pass' -g $login -G $login,user -d \/home\/user\/$login -k \/home\/skel -m -s \/bin\/bash /;
 
         #Ajout du login + mdp de la personne ajoutée
-        open(LOG, ">>log");
-        print LOG "$login;$pass\n";
-        close(LOG);
+        #open(LOG, ">>log");
+        #print LOG "$login;$pass\n";
+        #close(LOG);
 }
 
 ####################################
