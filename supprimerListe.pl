@@ -17,10 +17,14 @@ sub supprimer {
         $loginRetour = verification($login);
         chomp($loginRetour);
         $login = $loginRetour; 
+	
+	if($login eq "error") { next }
 
         $cheminLogin          = "/home/user/$login/"; 
-       
-        #On supprime le login de user
+ 
+	#print $cheminLogin."\n";     
+        
+	#On supprime le login de user
         qx/ delgroup $login user /;
         
         #On supprime l'utilisateur
@@ -39,9 +43,13 @@ sub supprimer {
 ##############################
 
 sub verification {
+    $login = shift;
+
     $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
     chomp($nombreDeLigne);
     
+    $nomRetrouve = `getent group | cut -d : -f 1 | grep $login` if($nombreDeLigne == 1);
+
     if ($nombreDeLigne >= 2) {
         print "Il existe plusieurs login constituant : $login.\n";
         $nom = `getent group | cut -d : -f 1 | grep $login`;
@@ -52,6 +60,18 @@ sub verification {
 
         return $loginRetour;
 
+    }elsif($nombreDeLigne == 1 && !($nomRetrouve eq $login)){
+	print "Le seul login retrouve avec les caractéristiques donnees est : ". $nomRetrouve;
+	print "Est-ce celui-ci que vous souhaitez supprimer ? (oui ou non) ";
+	
+	$reponse = <STDIN>;
+	chomp($reponse);
+	
+	if($reponse eq "oui"){
+		return $nomRetrouve;
+	}else{
+		return "error";	
+	}
     }else{
         return $login;
     }
