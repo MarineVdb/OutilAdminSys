@@ -25,8 +25,8 @@ if (opendir(DIR, skel)) {
 #Lecture de la ligne/du fichier
 while(<>) {
         chomp;
-        #($nom, $prenom) = split(/;/, $_);
-	creer($1, $2) if(/(.*)[;,:](.*)/);
+        ($nom, $prenom)= split(':', $_);
+        creer($nom, $prenom);
 }
 
 
@@ -45,12 +45,10 @@ sub creer {
         $login = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
         
         #On regarde le nombre de ligne que contient le login
-        $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
+        $nombreDeLigne = `getent group | cut -d : -f 1 | grep vandenbm | wc -l`;
         chomp($nombreDeLigne);
         $login .= $nombreDeLigne+1 if ($nombreDeLigne >= 1); #Si c'est >= 1 alors on lui ajoute le chiffre
       
-	print $login."\n";
-
         #On ajoue un groupe au nom du login
         qx/ groupadd $login /;
         
@@ -67,12 +65,12 @@ sub creer {
 
         #Ajout du login + mdp de la personne ajoutée
         open(LOG, ">>log");
-        	print LOG "$login;$pass\n";
+        print LOG "$login;$pass\n";
         close(LOG);
 }
 
 ####################################
-## Gestion des caractères spéciaux ##
+## Gesion des caractères spéciaux ##
 ####################################
 
 sub caractereSpecial {

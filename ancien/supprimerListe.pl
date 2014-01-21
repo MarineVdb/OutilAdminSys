@@ -1,20 +1,10 @@
 #!/usr/bin/perl
 
-########################
-## Gestion de l'utf-8 ##
-########################
-
-use encoding 'utf-8';
-use Unicode::Normalize;
-
-####################################
-## Lecture de la ligne/du fichier ##
-####################################
-
+#Lecture de la ligne/du fichier
 while(<>) {
         chomp;
-        #($nom, $prenom)= split(' ', $_);
-        supprimer($1, $2) if(/(.*)[,;:](.*)/);
+        ($nom, $prenom)= split(' ', $_);
+        supprimer($nom, $prenom);
 }
 
 ######################################
@@ -22,13 +12,7 @@ while(<>) {
 ######################################
 
 sub supprimer {
-	$nom = shift;
-	$prenom = shift;
-
-	$nom = caractereSpecial($nom);
-	$prenom = caractereSpecial($prenom);
-
-        $login = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
+        $login                = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
 
         $loginRetour = verification($login);
         chomp($loginRetour);
@@ -65,7 +49,6 @@ sub verification {
     chomp($nombreDeLigne);
     
     $nomRetrouve = `getent group | cut -d : -f 1 | grep $login` if($nombreDeLigne == 1);
-    chomp($nomRetrouve);
 
     if ($nombreDeLigne >= 2) {
         print "Il existe plusieurs login constituant : $login.\n";
@@ -116,16 +99,4 @@ sub triListe {
         `rm log`; 
         #On modifie l'ancien fichier en le nouveau !
         `mv log2 log`;
-}
-
-#####################################
-## Gestion des caractères spéciaux ##
-#####################################
-
-sub caractereSpecial {
-	$mot = shift;
-	$mot = NFKD($mot);
-	$mot =~ s/\p{NonspacingMark}//g;
-	$mot =~ y/àâäçéèêëîïôöùûü/aaaceeeeiioouuu/;
-	return $mot;
 }
