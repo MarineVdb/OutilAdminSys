@@ -1,4 +1,0 @@
-OutilAdminSys
-=============
-
-Projet Administration Système
