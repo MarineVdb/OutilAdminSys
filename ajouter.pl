@@ -25,7 +25,7 @@ if (opendir(DIR, skel)) {
 #Lecture de la ligne/du fichier
 while(<>) {
         chomp;
-        ($nom, $prenom)= split(':', $_);
+        ($nom, $prenom)= split(';', $_);
         creer($nom, $prenom);
 }
 
