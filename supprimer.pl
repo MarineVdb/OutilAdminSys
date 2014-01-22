@@ -124,8 +124,9 @@ sub triListe {
 
 sub caractereSpecial {
 	$mot = shift;
-	$mot = NFKD($mot);
-	$mot =~ s/\p{NonspacingMark}//g;
-	$mot =~ y/àâäçéèêëîïôöùûü/aaaceeeeiioouuu/;
+	$mot = NFKD($mot); #Normalisation du mot
+	$mot =~ s/\p{NonspacingMark}//g; #Suppression des caractères spéciaux
+	$mot =~ y/àâäçéèêëîïôöùûü/aaaceeeeiioouuu/; #Suppression des accents
+	$mot =~ s/\ //g; #Suppression des espaces
 	return $mot;
 }
