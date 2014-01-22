@@ -25,14 +25,14 @@ if (opendir(DIR, skel)) {
 ## Lecture de la ligne/du fichier ##
 ####################################
 
-if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run"){
+if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run") {
 	$description = 1;
 	shift;
 }
 
 while(<>) {
-        chomp;
-        #($nom, $prenom) = split(/;/, $_);
+    chomp;
+    #($nom, $prenom) = split(/;/, $_);
 	creer($1, $2) if(/(.*)[;,:](.*)/);
 }
 
@@ -47,19 +47,19 @@ sub creer {
 	$prenom = shift;
 	
 	if($nom eq "" || $prenom eq ""){
-		print "Il manque le prenom ou le nom";
+		print "Il manque le prenom ou le nom pour $nom $prenom\n";
 		next;
 	}	
 
 	$nom = caractereSpecial($nom);
 	$prenom = caractereSpecial($prenom);
 
-        $login = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
-        
-        #On regarde le nombre de ligne que contient le login
-        $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
-        chomp($nombreDeLigne);
-        $login .= $nombreDeLigne+1 if ($nombreDeLigne >= 1); #Si c'est >= 1 alors on lui ajoute le chiffre
+    $login = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
+    
+    #On regarde le nombre de ligne que contient le login
+    $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
+    chomp($nombreDeLigne);
+    $login .= $nombreDeLigne+1 if ($nombreDeLigne >= 1); #Si c'est >= 1 alors on lui ajoute le chiffre
       
 	#Création du mot de passe aléatoire
 	$pass = qx / pwgen -sA1 8 /;
@@ -69,21 +69,21 @@ sub creer {
 	$crypt_pass = qx / mkpasswd -m md5 $pass /;
 	chomp $crypt_pass;
 	
-	if($description == 1){
+	if($description == 1) {
 		print "Création du groupe : $login\n";
 		print "Création de l'utilisateur : $login\n";
 		print "Son mot de passe sera : $pass\n\n";
-	}else{
+	} else {
 		#On ajoute un groupe au nom du login
-	        qx/ groupadd $login /;
+        qx/ groupadd $login /;
 
-        	#Ajout de l'utilisateur
-        	qx/ useradd $login -p '$crypt_pass' -g $login -G $login,user -d \/home\/user\/$login -k \/home\/skel -m -s \/bin\/bash /;
+    	#Ajout de l'utilisateur
+    	qx/ useradd $login -p '$crypt_pass' -g $login -G $login,user -d \/home\/user\/$login -k \/home\/skel -m -s \/bin\/bash /;
 
-        	#Ajout du login + mdp de la personne ajoutée
-       		open(LOG, ">>log");
-        		print LOG "$login;$pass\n";
-        	close(LOG);
+    	#Ajout du login + mdp de la personne ajoutée
+   		open(LOG, ">>log");
+    		print LOG "$login;$pass\n";
+    	close(LOG);
 	}
 }
 
