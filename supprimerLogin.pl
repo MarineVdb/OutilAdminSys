@@ -11,6 +11,11 @@ use Unicode::Normalize;
 ## Lecture de la ligne/du fichier ##
 ####################################
 
+if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run"){
+	$native = 1;
+	shift;
+}
+
 while(<>) {
         chomp;
         #($nom, $prenom)= split(' ', $_);
@@ -35,18 +40,24 @@ sub supprimer {
 
         $cheminLogin          = "/home/user/$login/";    
         
-	#On supprime le login de user
-        qx/ delgroup $login user /;
+	if($native == 1){
+		print "Suppression de $login du groupe user \n";
+		print "Suppression de l'utilisateur : $login \n";
+		print "Suppression du répertoire : $cheminLogin\n\n";
+	}else{
+		#On supprime le login de user
+        	qx/ delgroup $login user /;
         
-        #On supprime l'utilisateur
-        qx/ deluser $login /;
+        	#On supprime l'utilisateur
+        	qx/ deluser $login /;
 
-        #On supprime l'intérieur du fichier
-        `rm -rf $cheminLogin`;
+        	#On supprime l'intérieur du fichier
+        	`rm -rf $cheminLogin`;
 
-        #On envoie en paramètre le login qui va être supprime du fichier log
-        triListe($login);
-        print "Le login $login n'existe plus, ainsi que son répertoire.\n";
+        	#On envoie en paramètre le login qui va être supprime du fichier log
+       		triListe($login);
+        	print "Le login $login n'existe plus, ainsi que son répertoire.\n";
+	}
 }
 
 ##############################

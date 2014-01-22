@@ -21,8 +21,15 @@ if (opendir(DIR, skel)) {
         mkdir "/home/skel/Public";
         mkdir "/home/skel/Téléchargements";
 }
+####################################
+## Lecture de la ligne/du fichier ##
+####################################
 
-#Lecture de la ligne/du fichier
+if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run"){
+	$native = 1;
+	shift;
+}
+
 while(<>) {
         chomp;
         #($nom, $prenom) = split(/;/, $_);
@@ -54,31 +61,35 @@ sub creer {
         chomp($nombreDeLigne);
         $login .= $nombreDeLigne+1 if ($nombreDeLigne >= 1); #Si c'est >= 1 alors on lui ajoute le chiffre
       
-	print $login."\n";
+	#Création du mot de passe aléatoire
+	$pass = qx / pwgen -sA1 8 /;
+	chomp $pass;
 
-        #On ajoue un groupe au nom du login
-        qx/ groupadd $login /;
-        
-        #Création du mot de passe aléatoire
-        $pass                = qx/ pwgen -sA1 8 /;
-        chomp $pass;
+	#Cryptage du mot de passe
+	$crypt_pass = qx / mkpasswd -m md5 $pass /;
+	chomp $crypt_pass;
+	
+	if($native == 1){
+		print "Création du groupe : $login\n";
+		print "Création de l'utilisateur : $login\n";
+		print "Son mot de passe sera : $pass\n\n";
+	}else{
+		#On ajoute un groupe au nom du login
+	        qx/ groupadd $login /;
 
-        #Cryptage du mot de passe
-        $crypt_pass = qx/ mkpasswd -m md5 $pass /;
-        chomp $crypt_pass;
+        	#Ajout de l'utilisateur
+        	qx/ useradd $login -p '$crypt_pass' -g $login -G $login,user -d \/home\/user\/$login -k \/home\/skel -m -s \/bin\/bash /;
 
-        #Ajout de l'utilisateur
-        qx/ useradd $login -p '$crypt_pass' -g $login -G $login,user -d \/home\/user\/$login -k \/home\/skel -m -s \/bin\/bash /;
-
-        #Ajout du login + mdp de la personne ajoutée
-        open(LOG, ">>log");
-        	print LOG "$login;$pass\n";
-        close(LOG);
+        	#Ajout du login + mdp de la personne ajoutée
+       		open(LOG, ">>log");
+        		print LOG "$login;$pass\n";
+        	close(LOG);
+	}
 }
 
-####################################
+#####################################
 ## Gestion des caractères spéciaux ##
-####################################
+#####################################
 
 sub caractereSpecial {
 	$mot = shift;
