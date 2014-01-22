@@ -23,6 +23,7 @@ while(<>) {
 
 sub supprimer {
 	$login = shift;
+	next if($login eq "");
 	
 	$login = caractereSpecial($login);
 
@@ -30,7 +31,7 @@ sub supprimer {
         chomp($loginRetour);
         $login = $loginRetour; 
 	
-	if($login eq "error") { next }
+	if($login eq "error") { print "le login n'existe pas\n"; next; }
 
         $cheminLogin          = "/home/user/$login/";    
         

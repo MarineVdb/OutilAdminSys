@@ -38,6 +38,11 @@ while(<>) {
 sub creer {
 	$nom = shift;
 	$prenom = shift;
+	
+	if($nom eq "" || $prenom eq ""){
+		print "Il manque le prenom ou le nom";
+		next;
+	}	
 
 	$nom = caractereSpecial($nom);
 	$prenom = caractereSpecial($prenom);

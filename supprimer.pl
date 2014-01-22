@@ -24,6 +24,11 @@ while(<>) {
 sub supprimer {
 	$nom = shift;
 	$prenom = shift;
+	
+	if($nom eq "" || $prenom eq ""){
+		print "Il manque le nom ou prenom\n";
+		next;
+	}	
 
 	$nom = caractereSpecial($nom);
 	$prenom = caractereSpecial($prenom);
