@@ -12,7 +12,7 @@ use Unicode::Normalize;
 ####################################
 
 if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run"){
-	$native = 1;
+	$description = 1;
 	shift;
 }
 
@@ -40,7 +40,7 @@ sub supprimer {
 
         $cheminLogin          = "/home/user/$login/";    
         
-	if($native == 1){
+	if($description == 1){
 		print "Suppression de $login du groupe user \n";
 		print "Suppression de l'utilisateur : $login \n";
 		print "Suppression du répertoire : $cheminLogin\n\n";

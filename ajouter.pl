@@ -26,7 +26,7 @@ if (opendir(DIR, skel)) {
 ####################################
 
 if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run"){
-	$native = 1;
+	$description = 1;
 	shift;
 }
 
@@ -69,7 +69,7 @@ sub creer {
 	$crypt_pass = qx / mkpasswd -m md5 $pass /;
 	chomp $crypt_pass;
 	
-	if($native == 1){
+	if($description == 1){
 		print "Création du groupe : $login\n";
 		print "Création de l'utilisateur : $login\n";
 		print "Son mot de passe sera : $pass\n\n";
