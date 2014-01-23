@@ -84,23 +84,23 @@ sub verification {
 ##########################################################
 
 sub triListe {
-        #Création du fichier log2 et ouverture du fichier log
-        open(LOG2, ">>log2") || die ("impossible d'ourir le fichier LOG. \n");
-        open(LOG, "log") || die ("Fichier LOG inexistant. \n");
-                while (my $ligne = <LOG>){
-                        #Si le début de la ligne ne correspond pas au login de la personne que l'on supprime
-                        #On l'ajoute au fichier lg2
-                        if ($ligne !~ /^$login;/){ 
-                               print LOG2 $ligne;
-                        }
-                } 
-        close(LOG); 
-        close(LOG2);
+    #Création du fichier log2 et ouverture du fichier log
+    open(LOG2, ">>log2") || die ("impossible d'ourir le fichier LOG. \n");
+    open(LOG, "log") || die ("Fichier LOG inexistant. \n");
+    while (my $ligne = <LOG>){
+        #Si le début de la ligne ne correspond pas au login de la personne que l'on supprime
+        #On l'ajoute au fichier lg2
+        if ($ligne !~ /^$login;/){ 
+               print LOG2 $ligne;
+        }
+    } 
+    close(LOG); 
+    close(LOG2);
 
-        #On supprime l'ancien log pour en ouvrir un autre
-        `rm log`; 
-        #On modifie l'ancien fichier en le nouveau !
-        `mv log2 log`;
+    #On supprime l'ancien log pour en ouvrir un autre
+    `rm log`; 
+    #On modifie l'ancien fichier en le nouveau !
+    `mv log2 log`;
 }
 
 #####################################

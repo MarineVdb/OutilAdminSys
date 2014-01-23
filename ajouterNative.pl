@@ -11,14 +11,14 @@ use Unicode::Normalize;
 ## Lecture de la ligne/du fichier ##
 ####################################
 
-if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run"){
+if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run") {
 	$description = 1;
 	shift;
 }
 
 while(<>) {
-        chomp;
-        #($nom, $prenom) = split(/;/, $_);
+    chomp;
+    #($nom, $prenom) = split(/;/, $_);
 	creer($1, $2) if(/(.*)[;,:](.*)/);
 }
 
@@ -59,12 +59,12 @@ sub creer {
 	$cheminLogin = "/home/user/$login";
 	chomp($cheminLogin);
 	
-	if($description == 1){
+	if($description == 1) {
 		print "Création du groupe : $login\n";
 		print "Création de l'utilisateur : $login\n";
 		print "Son mot de passe sera : $pass\n\n";
 		print "Création du répertoire : $cheminLogin\n";
-	}else{
+	} else {
 		#Déclaration du début des UID et GID
 		$uidDebut = 1000;
 		$gidFinal = 1000;
@@ -120,19 +120,19 @@ sub creer {
 
 		#Ajout du groupe au nom de l'utilisateur au fichier /etc/group
 		open(GROUP, ">>/etc/group") || die("Ouverture du fichier /etc/group impossible");
-			print GROUP "$login:x:$gidFinal:$login\n";
+		print GROUP "$login:x:$gidFinal:$login\n";
 		close (GROUP);
 		print "$login:x:$gidFinal:$login\n";
 
 		#Ajout de l'utilisateur au fichier /etc/passwd
 		open(PASSWD, ">>/etc/passwd") || die("Ouverture du fichier /etc/passwd impossible");
-			print PASSWD "$login:x:$uidFinal:$gidFinal: :$cheminLogin:/bin/bash\n";
+		print PASSWD "$login:x:$uidFinal:$gidFinal: :$cheminLogin:/bin/bash\n";
 		close(PASSWD);
 		print "$login:x:$uidFinal:$gidFinal: :$cheminLogin:/bin/bash\n";
 
 		#Ajout du mot de passe de l'utilisateur au fichier /etc/shadow
 		open(SHADOW, ">>/etc/shadow") || die("Ouverture du fichier /etc/shadow impossible");
-			print SHADOW "$login:$crypt_pass:16093:0:99999:7:::\n";
+		print SHADOW "$login:$crypt_pass:16093:0:99999:7:::\n";
 		close(SHADOW);
 		print "$login:$crypt_pass:16093:0:99999:7:::\n";
 		print "$login $pass\n";
@@ -148,7 +148,7 @@ sub creer {
 
     	#Ajout du login + mdp de la personne ajoutée
    		open(LOG, ">>log");
-    		print LOG "$login;$pass\n";
+    	print LOG "$login;$pass\n";
     	close(LOG);
 	}
 }
