@@ -7,20 +7,6 @@
 use encoding 'utf8';
 use Unicode::Normalize;
 
-#########################################
-## Création d'un dossier skelette type ##
-#########################################
-
-if (opendir(DIR, skel)) {
-        close(DIR);
-} else {
-        mkdir "/home/skel";
-        mkdir "/home/skel/Bureau";
-        mkdir "/home/skel/Documents";
-        mkdir "/home/skel/Documents/Ma Musique";
-        mkdir "/home/skel/Public";
-        mkdir "/home/skel/Téléchargements";
-}
 ####################################
 ## Lecture de la ligne/du fichier ##
 ####################################
@@ -68,75 +54,97 @@ sub creer {
 	#Cryptage du mot de passe
 	$crypt_pass = qx / mkpasswd -m md5 $pass /;
 	chomp $crypt_pass;
+
+	#Création du chemin de l'utilisateur
+	$cheminLogin = "/home/user/$login";
+	chomp($cheminLogin);
 	
 	if($description == 1){
 		print "Création du groupe : $login\n";
 		print "Création de l'utilisateur : $login\n";
 		print "Son mot de passe sera : $pass\n\n";
+		print "Création du répertoire : $cheminLogin\n";
 	}else{
-		#On ajoute un groupe au nom du login
-        $uidFinal = 1000;
+		#Déclaration du début des UID et GID
+		$uidDebut = 1000;
 		$gidFinal = 1000;
 
-		open(GROUP, ">>/etc/group") || die("Ouverture du fichier group impossible");
-		while(<GROUP>){
+		#Recheche du GID final
+		open(GROUP, "/etc/group") || die("Ouverture du fichier group impossible");
+		while(<GROUP>) {
 			$ligne = $_;
 			chomp($ligne);
 			$gid = `echo $ligne | cut -d : -f 3`;
 			chomp $gid;
-			while($gid >= $gidFinal && $gid != 65534){
-				$gidFinal++;
+			if($gid >= $gidfinal && $gid != 65534) {
+				$gidFinal = $gid + 1;
 			}
 		}
-		close(GROUP);
+		close(GROUP); 
 
+		#Recheche du UID final
 		open PASSWD, "/etc/passwd" || die("Ouverture du fichier passwd impossible");
-		while(<PASSWD>){ 
+		while(<PASSWD>) { 
 			$ligne = $_;
 			$ligne =~ s/\(//g;
 			$ligne =~ s/\)//g;
 			chomp($ligne); 
 			$uid = `echo $ligne | cut -d : -f 3`;
 			chomp $gid;
-			while($uid >= $uidFinal && $uid != 65534){
-				$uidFinal++;
+			if($uid >= $uidFinal && $uid != 65534) {
+				$uidFinal = $uid + 1;
 			}
 		}
-		close(PASSWD);
+		close(PASSWD); 
 
-    	#Ajout du groupe au nom de l'utilisateur
-    	open(GROUP, ">>/etc/group") || die("Ouverture du fichier /etc/group impossible");
+		#Ajout de l'utilisateur au groupe USER
+		open(GROUP, "/etc/group") || die("Ouverture du fichier /etc/group impossible");
+		open(GR, ">group") || die("ouverture du fichier local group impossible");
+		while(<GROUP>) {
+			chomp;
+			if($_ =~ /^(user:)/) {
+				print GR $_;
+				if($_ !~ /(:)$/) {
+					print GR ",";
+				}
+				print GR "$login\n";
+			} else {
+				print GR $_."\n";
+			}
+		}
+		close (GROUP);
+		close (GR);
+
+		qx/ chmod 644 group /; #Modificaion des droit du fichier
+		qx/ mv group \/etc\/group /; #On remplace le vrai par le temporaire
+
+		#Ajout du groupe au nom de l'utilisateur au fichier /etc/group
+		open(GROUP, ">>/etc/group") || die("Ouverture du fichier /etc/group impossible");
 			print GROUP "$login:x:$gidFinal:$login\n";
 		close (GROUP);
-			print "$login:x:$gidFinal:$login\n";
+		print "$login:x:$gidFinal:$login\n";
 
-		#Ajout du compte au nom de l'utilisateur
+		#Ajout de l'utilisateur au fichier /etc/passwd
 		open(PASSWD, ">>/etc/passwd") || die("Ouverture du fichier /etc/passwd impossible");
 			print PASSWD "$login:x:$uidFinal:$gidFinal: :$cheminLogin:/bin/bash\n";
 		close(PASSWD);
-			print "$login:x:$uidFinal:$gidFinal: :$cheminLogin:/bin/bash\n";
+		print "$login:x:$uidFinal:$gidFinal: :$cheminLogin:/bin/bash\n";
 
-		#Ajout du mot de passe de l'utilisateur
+		#Ajout du mot de passe de l'utilisateur au fichier /etc/shadow
 		open(SHADOW, ">>/etc/shadow") || die("Ouverture du fichier /etc/shadow impossible");
-			print SHADOW "$login:$crypt_pass:16092:0:99999:7:::\n";
+			print SHADOW "$login:$crypt_pass:16093:0:99999:7:::\n";
 		close(SHADOW);
-		
-		#Affichage
-		print "$login:$crypt_pass:16092:0:99999:7:::\n";
+		print "$login:$crypt_pass:16093:0:99999:7:::\n";
 		print "$login $pass\n";
 
-		#Ajout du login au groupe USER
-		open(GROUP, ">>/etc/group") || die("Ouverture du fichier /etc/group impossible");
-		while(<GROUP>){
-			$ligne = $_; 
-			chomp($ligne);
-			if($ligne =~ /^user\:/){
-				print GROUP "$ligne,$login\n";
-			}else{
-				print GROUP "$ligne\n";
-			}
-		}
-		close (GROUP);
+		#Création des répertoire dédié ) l'utilisateur
+		qx / mkdir -p $cheminLogin /;
+        mkdir "$cheminLogin/Bureau";
+        mkdir "$cheminLogin/Documents";
+        mkdir "$cheminLogin/Documents/Ma Musique";
+        mkdir "$cheminLogin/Public";
+        mkdir "$cheminLogin/Téléchargements";
+        print "Le répertoire a été créé.\n";
 
     	#Ajout du login + mdp de la personne ajoutée
    		open(LOG, ">>log");

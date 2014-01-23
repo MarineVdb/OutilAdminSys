@@ -31,8 +31,7 @@ if(@ARGV[0] eq "-n" || @ARGV[0] eq "--dry-run"){
 }
 
 while(<>) {
-        chomp;
-        #($nom, $prenom) = split(/;/, $_);
+    chomp;
 	creer($1, $2) if(/(.*)[;,:](.*)/);
 }
 
@@ -54,12 +53,12 @@ sub creer {
 	$nom = caractereSpecial($nom);
 	$prenom = caractereSpecial($prenom);
 
-        $login = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
+    $login = lc( substr($nom, 0, 7) . substr($prenom, 0, 1) );
         
-        #On regarde le nombre de ligne que contient le login
-        $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
-        chomp($nombreDeLigne);
-        $login .= $nombreDeLigne+1 if ($nombreDeLigne >= 1); #Si c'est >= 1 alors on lui ajoute le chiffre
+    #On regarde le nombre de ligne que contient le login
+    $nombreDeLigne = `getent group | cut -d : -f 1 | grep $login | wc -l`;
+    chomp($nombreDeLigne);
+    $login .= $nombreDeLigne+1 if ($nombreDeLigne >= 1); #Si c'est >= 1 alors on lui ajoute le chiffre
       
 	#Création du mot de passe aléatoire
 	$pass = qx / pwgen -sA1 8 /;
@@ -75,15 +74,15 @@ sub creer {
 		print "Son mot de passe sera : $pass\n\n";
 	}else{
 		#On ajoute un groupe au nom du login
-	        qx/ groupadd $login /;
+        qx/ groupadd $login /;
 
-        	#Ajout de l'utilisateur
-        	qx/ useradd $login -p '$crypt_pass' -g $login -G $login,user -d \/home\/user\/$login -k \/home\/skel -m -s \/bin\/bash /;
+    	#Ajout de l'utilisateur
+    	qx/ useradd $login -p '$crypt_pass' -g $login -G $login,user -d \/home\/user\/$login -k \/home\/skel -m -s \/bin\/bash /;
 
-        	#Ajout du login + mdp de la personne ajoutée
-       		open(LOG, ">>log");
-        		print LOG "$login;$pass\n";
-        	close(LOG);
+    	#Ajout du login + mdp de la personne ajoutée
+   		open(LOG, ">>log");
+    		print LOG "$login;$pass\n";
+    	close(LOG);
 	}
 }
 
