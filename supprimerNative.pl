@@ -48,10 +48,12 @@ sub supprimer {
 		print "Suppression du répertoire : $cheminLogin\n\n";
 	} else {
 		#On supprime le login de user
-    	qx/ delgroup $login user /;
+    	# qx/ delgroup $login user /;
+        suppGroup($login);
     
     	#On supprime l'utilisateur
-    	qx/ deluser $login /;
+    	# qx/ deluser $login /;
+        suppUser($login);
 
     	#On supprime l'intérieur du fichier
     	`rm -rf $cheminLogin`;
@@ -74,9 +76,73 @@ sub verification {
     
     if ($nombreDeLigne == 1) {
         return $login;
-    }else{
+    } else {
         return "error";
     }
+}
+
+###########################
+## Suppression du groupe ##
+###########################
+
+sub suppGroup {
+    $login = shift;
+    
+    open(GROUP, "/etc/group") || die("Ouverture du fichier /etc/group impossible");
+    open(GR, ">group") || die("ouverture du fichier local group impossible");
+    while(<GROUP>) {
+        chomp;
+        if($_ =~ /^(user)(.*)(:)$login,(.+)/) {
+            print GR $1.$2.$3.$4."\n";
+        } elsif($_ =~ /^(user)(.*)(,)$login(.*)/) {
+            print GR $1.$2.$4."\n";
+        } elsif($_ =~ /^(user)(.*)($login)/) {
+            print GR $1.$2."\n";
+        } elsif($_ !~ /^($login)/) {
+            print GR $_."\n";
+        }
+    }
+    close(GROUP);
+    close(GR);
+
+    qx/ chmod 644 group /;
+    qx/ mv group \/etc\/ /;
+}
+
+###########################
+## Suppression du groupe ##
+###########################
+
+sub suppUser {
+    $login = shift;
+    
+    open(PASS, "/etc/passwd") || die("Ouverture du fichier /etc/passwd impossible");
+    open(PS, ">passwd") || die("ouverture du fichier local passwd impossible");
+    while(<PASS>) {
+        chomp;
+        if($_ !~ /^($login)/) {
+            print PS $_."\n";
+        }
+    }
+    close(PASS);
+    close(PS);
+
+    qx/ chmod 644 passwd /;
+    qx/ mv passwd \/etc\/ /;
+    
+    open(SHAD, "/etc/shadow") || die("Ouverture du fichier /etc/shadow impossible");
+    open(SH, ">shadow") || die("ouverture du fichier local shadow impossible");
+    while(<SHAD>) {
+        chomp;
+        if($_ !~ /^($login)/) {
+            print SH $_."\n";
+        }
+    }
+    close(SHAD);
+    close(SH);
+
+    qx/ chmod 640 shadow /;
+    qx/ mv shadow \/etc\/ /;
 }
 
 ##########################################################
