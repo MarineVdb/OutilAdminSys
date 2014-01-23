@@ -17,46 +17,54 @@ chomp $crypt_pass;
 
 
 open(GROUP, "/etc/group") || die("Ouverture du fichier group impossible");
-while(<GROUP>){
+while(<GROUP>) {
 	$ligne = $_;
 	chomp($ligne);
 	$gid = `echo $ligne | cut -d : -f 3`;
 	chomp $gid;
-	while($gid >= $gidFinal && $gid != 65534){
-		$gidFinal++;
+	if($gid >= $gidfinal && $gid != 65534) {
+		$gidFinal = $gid + 1;
 	}
 }
 close(GROUP);
 
 print $gidFinal."\n";
 
-		open PASSWD, "/etc/passwd" || die("Ouverture du fichier passwd impossible");
-		while(<PASSWD>){ 
-			$ligne = $_;
-			$ligne =~ s/\(//g;
-			$ligne =~ s/\)//g;
-			chomp($ligne); 
-			$uid = `echo $ligne | cut -d : -f 3`;
-			chomp $gid;
-			while($uid >= $uidFinal && $uid != 65534){
-				$uidFinal++;
-			}
+open PASSWD, "/etc/passwd" || die("Ouverture du fichier passwd impossible");
+while(<PASSWD>) { 
+	$ligne = $_;
+	$ligne =~ s/\(//g;
+	$ligne =~ s/\)//g;
+	chomp($ligne); 
+	$uid = `echo $ligne | cut -d : -f 3`;
+	chomp $gid;
+	if($uid >= $uidFinal && $uid != 65534) {
+		$uidFinal = $uid + 1;
+	}
+}
+close(PASSWD);
+
+print $uidFinal."\n";
+
+open(GROUP, "/etc/group") || die("Ouverture du fichier /etc/group impossible");
+open(GR, ">group") || die("ouverture du fichier local group impossible");
+while(<GROUP>) {
+	chomp;
+	if($_ =~ /^(user:)/) {
+		print GR $_;
+		if($_ !~ /(:)$/) {
+			print GR ",";
 		}
-		close(PASSWD);
-
-		print $uidFinal."\n";
-
-open(GROUP, ">>/etc/group") || die("Ouverture du fichier /etc/group impossible");
-while(<GROUP>){
-	$ligne = $_; 
-	chomp($ligne);
-	if($ligne =~ /user:/){
-		print GROUP "$ligne,$login\n";
-	}else{
-		print GROUP "$ligne\n";
+		print GR "$login\n";
+	} else {
+		print GR $_."\n";
 	}
 }
 close (GROUP);
+close (GR);
+
+qx/ chmod 644 group /;
+qx/ mv group \/etc\/group /;
 
 print "modifier\n";
 
