@@ -1,6 +1,16 @@
 #!/usr/bin/perl
 
+#Traiter mdp (-p) , path ( -c ), shell ( -s )
+#usermod
+
+
 $login=shift;
+$change=0;
+
+if(@ARGV[0] eq "--dry-run" || @ARGV[0] eq "-n"){
+	shift;
+	$change=1;
+}
 
 #Parcourt des parametres
 while(scalar @ARGV>0){
@@ -27,40 +37,24 @@ sub changePw(){
 	print "New password for $login: $newPw\n";
 	$pw= qx/ mkpasswd -m md5 '$newPw' /;
 	chomp($pw);
-	modifierListe($login, $newPw);
-	qx / usermod -p '$pw' $login /;
+	if($change == 0){
+		qx / usermod -p '$pw' $login /;
+	}
+	
 }
 
 sub changePath(){
 	print "New path for $login:  $newPath\n";
-	qx / usermod -m -d $newPath $login /;
+	if($change == 0){
+		qx / usermod -m -d $newPath $login /;
+	}
 }
 
 sub changeShell(){
 	print "New shell for $login: $newShell\n";
-	qx / usermod -s $newShell $login /;
-}
-
-sub modifierListe() {
-	$login = shift;
-	$mdp = shift;
-	#Création du fichier log2 et ouverture du fichier log
-    open(LOG2, ">>log2") || die ("impossible d'ourir le fichier LOG. \n");
-    open(LOG, "log") || die ("Fichier LOG inexistant. \n");
-            while (my $ligne = <LOG>){
-                    #Si le début de la ligne ne correspond pas au login de la personne que l'on supprime
-                    #On l'ajoute au fichier lg2
-                    if ($ligne =~ /^$login;/){ 
-                           print LOG2 "$login;$mdp";
-                    }
-            } 
-    close(LOG); 
-    close(LOG2);
-
-    #On supprime l'ancien log pour en ouvrir un autre
-    `rm log`; 
-    #On modifie l'ancien fichier en le nouveau !
-    `mv log2 log`;
+	if($change == 0){
+		qx / usermod -s $newShell $login /;
+	}
 }
 
 
